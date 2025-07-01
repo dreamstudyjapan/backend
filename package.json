@@ -1,0 +1,17 @@
+{
+  "name": "studyinjapan-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "api/contact.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^8.16.1",
+    "nodemailer": "^7.0.4",
+    "xlsx": "^0.18.5"
+  }
+}
