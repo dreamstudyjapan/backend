@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
   } = req.body;
 
   // Auto-reply to user
-  
+
   const autoReply = {
     from: process.env.EMAIL_USER,
     to: email,
@@ -62,7 +62,7 @@ Study in Japan Team
 Name: ${name}
 Email: ${email}
 Confirm Email: ${cmail}
-Phone: (${countryCode}) ${tel}
+Phone: ${countryCode}-${tel}
 DOB: ${dobDay}-${dobMonth}-${dobYear}
 Occupation: ${occupation}
 Address: ${address}
