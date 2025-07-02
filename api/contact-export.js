@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 
 // MongoDB connection
 const uri = process.env.MONGODB_URI;
@@ -46,31 +46,77 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Only GET method is allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Only GET allowed' });
 
   try {
     await connectToDB();
     const contacts = await Contact.find({}).lean();
 
-    // Convert MongoDB documents to Excel worksheet
-    const worksheet = XLSX.utils.json_to_sheet(contacts);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Contacts');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Contacts');
 
-    // Generate buffer from workbook
-    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    // Define styled header row
+    worksheet.columns = [
+      { header: 'Name', key: 'name', width: 20 },
+      { header: 'DOB - Year', key: 'dobYear', width: 12 },
+      { header: 'DOB - Month', key: 'dobMonth', width: 14 },
+      { header: 'DOB - Day', key: 'dobDay', width: 12 },
+      { header: 'Occupation', key: 'occupation', width: 20 },
+      { header: 'Primary Email', key: 'email', width: 25 },
+      { header: 'Confirm Email', key: 'cmail', width: 25 },
+      { header: 'Phone', key: 'tel', width: 18 },
+      { header: 'Address', key: 'address', width: 30 },
+      { header: 'JLPT Level', key: 'jlpt', width: 10 },
+      { header: 'Interested Course', key: 'interestedCourse', width: 25 },
+      { header: 'Questions', key: 'questions', width: 30 },
+      { header: 'Submitted At', key: 'submittedAt', width: 25 },
+    ];
 
-    // Set headers for download
+    // Add rows with formatted data
+    contacts.forEach(c => {
+      worksheet.addRow({
+        ...c,
+        submittedAt: new Date(c.submittedAt).toLocaleString(),
+      });
+    });
+
+    // Style header row
+    worksheet.getRow(1).eachCell(cell => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF4F81BD' },
+      };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+    });
+
+    // Border & wrap for data cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell(cell => {
+        cell.alignment = { wrapText: true, vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      });
+    });
+
+    // Send workbook as downloadable file
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=contacts.xlsx');
-    
-    return res.status(200).send(buffer);
+    res.setHeader('Content-Disposition', 'attachment; filename=styled_contacts.xlsx');
+
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (err) {
     console.error('Export Error:', err);
     return res.status(500).json({ success: false, error: 'Failed to export contacts' });
