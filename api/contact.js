@@ -26,6 +26,7 @@ module.exports = async (req, res) => {
     cmail,
     occupation,
     tel,
+    countryCode,
     address,
     dobYear,
     dobMonth,
@@ -60,7 +61,7 @@ Study in Japan Team
 Name: ${name}
 Email: ${email}
 Confirm Email: ${cmail}
-Phone: ${tel}
+Phone: (${countryCode}) ${tel}
 DOB: ${dobDay}-${dobMonth}-${dobYear}
 Occupation: ${occupation}
 Address: ${address}

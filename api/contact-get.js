@@ -29,6 +29,7 @@ const ContactSchema = new mongoose.Schema({
   email: String,
   cmail: String,
   tel: String,
+  countryCode: String,
   address: String,
   jlpt: String,
   interestedCourse: String,
