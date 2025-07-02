@@ -113,7 +113,7 @@ module.exports = async (req, res) => {
 
     // Send workbook as downloadable file
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=styled_contacts.xlsx');
+    res.setHeader('Content-Disposition', 'attachment; filename=contacts.xlsx');
 
     await workbook.xlsx.write(res);
     res.end();
