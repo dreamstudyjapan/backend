@@ -1,36 +1,82 @@
 const nodemailer = require('nodemailer');
 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// CORS setup helper
+function setCORSHeaders(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
 module.exports = async (req, res) => {
-   // ✅ Add CORS headers
-   res.setHeader('Access-Control-Allow-Origin', '*'); // change '*' to your frontend URL in production
-   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  setCORSHeaders(res);
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Only POST method is allowed' });
 
-  const { name, email, message } = req.body;
+  const {
+    name,
+    email,
+    cmail,
+    occupation,
+    tel,
+    address,
+    dobYear,
+    dobMonth,
+    dobDay,
+    jlpt,
+    interestedCourse,
+    questions,
+  } = req.body;
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-
-  const mailOptions = {
+  // Auto-reply to user
+  const autoReply = {
     from: process.env.EMAIL_USER,
     to: email,
     subject: 'Thank you for contacting us!',
-    text: `Hi ${name},\n\nThank you for your message: "${message}".\n\nWe'll get back to you soon.\n\nBest regards,\nTeam`,
+    text: `Hi ${name},
+
+Thank you for contacting us. We’ve received your message and will get back to you shortly.
+
+Regards,  
+Study in Japan Team
+    `,
+  };
+
+  // Full contact details to website owner
+  const notifyOwner = {
+    from: email,
+    to: process.env.EMAIL_USER,
+    subject: 'New Contact Form Submission',
+    text: `
+📩 New Contact Form Submission:
+
+Name: ${name}
+Email: ${email}
+Confirm Email: ${cmail}
+Phone: ${tel}
+DOB: ${dobDay}-${dobMonth}-${dobYear}
+Occupation: ${occupation}
+Address: ${address}
+JLPT: ${jlpt}
+Interested Course: ${interestedCourse}
+Questions: ${questions}
+    `,
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    return res.status(200).json({ success: true, message: 'Thank-you email sent successfully!' });
-  } catch (error) {
-    console.error('Email error:', error);
-    return res.status(500).json({ success: false, error: 'Failed to send email' });
+    await transporter.sendMail(autoReply);
+    await transporter.sendMail(notifyOwner);
+
+    return res.status(200).json({ success: true, message: 'Emails sent successfully' });
+  } catch (err) {
+    console.error('Mail Send Error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to send emails' });
   }
 };
