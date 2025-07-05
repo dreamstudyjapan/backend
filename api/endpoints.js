@@ -1,8 +1,5 @@
 
 
-
-
-
 // Hit end point to get all contact data
 // https://backend-alpha-eight-64.vercel.app/contact/get
 
