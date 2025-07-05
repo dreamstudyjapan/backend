@@ -44,11 +44,11 @@
       "dest": "/api/contact.js"
     },
     {
-      "src": "/contact/delete-all",
+      "src": "/delete-all",
       "dest": "/api/contact-delete.js"
     },
     {
-      "src": "/contact/delete",
+      "src": "/delete",
       "dest": "/api/contact-delete-all.js"
     }
   ]
