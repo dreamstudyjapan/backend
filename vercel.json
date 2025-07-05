@@ -14,11 +14,11 @@
       "use": "@vercel/node"
     },
     {
-      "src": "api/contact-delete",
+      "src": "api/contact-delete.js",
       "use": "@vercel/node"
     },
     {
-      "src": "api/contact-delete-all",
+      "src": "api/contact-delete-all.js",
       "use": "@vercel/node"
     },
     {
@@ -44,11 +44,11 @@
       "dest": "/api/contact.js"
     },
     {
-      "src": "/delete-all",
+      "src": "/contact/delete",
       "dest": "/api/contact-delete.js"
     },
     {
-      "src": "/delete",
+      "src": "/contact/delete-all",
       "dest": "/api/contact-delete-all.js"
     }
   ]
