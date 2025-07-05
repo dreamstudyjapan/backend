@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// MongoDB connection
+// MongoDB connection setup
 const uri = process.env.MONGODB_URI;
 let cached = global.mongoose;
 
@@ -20,7 +20,7 @@ async function connectToDB() {
   return cached.conn;
 }
 
-// Contact schema (match your other schema)
+// Contact Schema
 const ContactSchema = new mongoose.Schema({
   name: String,
   dobYear: String,
@@ -38,35 +38,42 @@ const ContactSchema = new mongoose.Schema({
   submittedAt: { type: Date, default: Date.now },
 });
 
+// Avoid re-registering the model
 const Contact = mongoose.models.Contact || mongoose.model('Contact', ContactSchema);
 
 // API handler
 module.exports = async (req, res) => {
-  // CORS
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'DELETE') {
-    return res.status(405).json({ error: 'Only DELETE method is allowed' });
+    return res.status(405).json({ success: false, error: 'Only DELETE method is allowed' });
   }
 
   try {
     await connectToDB();
-    const { contactId } = req.body;
 
-    if (!contactId) {
-      return res.status(400).json({ success: false, error: 'contactId is required' });
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Missing email in request body' });
     }
 
-    const deleted = await Contact.findByIdAndDelete(contactId);
+    // Delete the contact by email
+    const deleted = await Contact.findOneAndDelete({ email });
 
     if (!deleted) {
-      return res.status(404).json({ success: false, error: 'Contact not found' });
+      return res.status(404).json({ success: false, error: `Contact with email ${email} not found` });
     }
 
-    return res.status(200).json({ success: true, message: 'Contact deleted successfully' });
+    return res.status(200).json({
+      success: true,
+      message: `Contact with email ${email} deleted successfully`,
+      deletedContact: deleted
+    });
   } catch (err) {
     console.error('Delete Error:', err);
     return res.status(500).json({ success: false, error: 'Failed to delete contact' });
