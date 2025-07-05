@@ -75,13 +75,20 @@ module.exports = async (req, res) => {
       { header: 'Submitted At', key: 'submittedAt', width: 25 },
     ];
 
-    // Add rows with formatted data
-    contacts.forEach(c => {
-      worksheet.addRow({
-        ...c,
-        submittedAt: new Date(c.submittedAt).toLocaleString(),
+    if (contacts.length === 0) {
+      worksheet.addRow(['No data found']);
+      worksheet.mergeCells('A2:N2'); // Merge the first 14 columns
+      const cell = worksheet.getCell('A2');
+      cell.font = { italic: true, bold: true, color: { argb: 'FFFF0000' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    } else {
+      contacts.forEach(c => {
+        worksheet.addRow({
+          ...c,
+          submittedAt: new Date(c.submittedAt).toLocaleString(),
+        });
       });
-    });
+    }
 
     // Style header row
     worksheet.getRow(1).eachCell(cell => {
@@ -100,7 +107,7 @@ module.exports = async (req, res) => {
       };
     });
 
-    // Border & wrap for data cells
+    // Apply border and wrapping to all rows
     worksheet.eachRow((row, rowNumber) => {
       row.eachCell(cell => {
         cell.alignment = { wrapText: true, vertical: 'middle' };
