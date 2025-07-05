@@ -41,14 +41,23 @@ module.exports = async (req, res) => {
   const autoReply = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: 'Thank you for contacting us!',
-    text: `Hi ${name},
+    subject: 'Thank You for Your Inquiry – Setu to Japan',
+    text: `Dear ${name} San,
 
-Thank you for contacting us. We’ve received your message and will get back to you shortly.
+Thank you for contacting Setu to Japan – your bridge to learning Japanese in Japan!
 
-Regards,  
-Study in Japan Team
-    `,
+We have received your inquiry successfully. Our team will review your details and get back to you shortly.
+
+If you have any urgent questions, feel free to reply to this email.
+
+In the meantime, we invite you to explore our website for more details:
+🌐 https://dreamstudyjapan.com
+
+We appreciate your interest and look forward to helping you start your journey of studying in Japan.
+
+Warm regards,
+Founder – Setu to Japan
+📧 dreamstudy.workjapan@gmail.com`
   };
 
   // Full contact details to website owner
